@@ -62,8 +62,11 @@ the contents of c
 -- /Tip:/ use @getArgs@ and @run@
 main ::
   IO ()
-main =
-  error "todo: Course.FileIO#main"
+main =                     --IO (List Chars) getargs : IO[List[Chars]] => || List[Chars] => IO
+  getArgs >>= \args ->
+    pure(run <$> args) >>= \_
+      -> return()
+
 
 type FilePath =
   Chars
@@ -90,13 +93,13 @@ getFile =
 printFiles ::
   List (FilePath, Chars)
   -> IO ()
-printFiles =
-  error "todo: Course.FileIO#printFiles"
+printFiles files =                       --pure
+  foldRight (\io -> (=<<) (\_ -> io)) (return()) (uncurry printFile <$> files)
 
 printFile ::
   FilePath
   -> Chars
   -> IO ()
-printFile =
-  error "todo: Course.FileIO#printFile"
+printFile file chars =
+  putStrLn =<< (readFile file)
 
