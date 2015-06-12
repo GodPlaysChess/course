@@ -165,16 +165,15 @@ firstRepeat ::
   Ord a =>
   List a
   -> Optional a   -- State (set, boolean) -> adding each el to set, and invoke contains or so. Must be linear time.
-firstRepeat li = traverseState
-firstRepeat (x :. xs) = find (==x) xs
-firstRepeat (x :. y :. xs) =
+firstRepeat Nil = Empty
+firstRepeat (x :. xs) = if (eval step x) then (Full x) else firstRepeat xs --need to flatmap set further
 
 step ::
   Ord a =>
   a
   -> State (Set a) Bool
 step a =
-  get st >>= (\set -> member set a)
+  get >>= (\set -> (set ++ a , member a set))
 
 
 firstRepeat' ::
