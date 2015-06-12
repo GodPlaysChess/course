@@ -58,6 +58,7 @@ foldLeft :: (b -> a -> b) -> b -> List a -> b
 foldLeft _ b Nil      = b
 foldLeft f b (h :. t) = let b' = f b h in b' `seq` foldLeft f b' t
 
+
 -- END Helper functions and data types
 
 -- | Returns the head of the list or the given default.

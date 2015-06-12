@@ -62,44 +62,49 @@ the contents of c
 -- /Tip:/ use @getArgs@ and @run@
 main ::
   IO ()
-main =                     --IO (List Chars) getargs : IO[List[Chars]] => || List[Chars] => IO
+main =
   getArgs >>= \args ->
-    pure(run <$> args) >>= \_
-      -> return()
+    void . sequence $ run <$> args
 
 
 type FilePath =
   Chars
 
--- /Tip:/ Use @getFiles@ and @printFiles@.
+-- /Tip:/ Use @getFiles@ and @printFiles@.       || reads and prints
 run ::
   Chars
   -> IO ()
-run =
-  error "todo: Course.FileIO#run"
+run file =
+   lines <$>
+   readFile file >>=
+   getFiles >>=
+   printFiles
 
 getFiles ::
   List FilePath
   -> IO (List (FilePath, Chars))
-getFiles =
-  error "todo: Course.FileIO#getFiles"
+getFiles files =
+  sequence $ getFile <$> files
 
 getFile ::
   FilePath
   -> IO (FilePath, Chars)
-getFile =
-  error "todo: Course.FileIO#getFile"
+getFile path =
+  lift2(,) (return path) (readFile path)
+  --lift2 (<$>) (,) readFile
 
 printFiles ::
   List (FilePath, Chars)
   -> IO ()
-printFiles files =                       --pure
-  foldRight (\io -> (=<<) (\_ -> io)) (return()) (uncurry printFile <$> files)
+printFiles =
+  void . sequence . (<$>) (uncurry printFile)
+  --foldRight (\io -> (=<<) (\_ -> io)) (return()) (uncurry printFile <$> files)
 
 printFile ::
   FilePath
   -> Chars
   -> IO ()
-printFile file chars =
-  putStrLn =<< (readFile file)
+printFile path content =
+    putStrLn path >>= \_ ->
+        putStrLn content
 
