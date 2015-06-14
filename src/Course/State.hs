@@ -150,7 +150,7 @@ findM ::
   (a -> f Bool)
   -> List a
   -> f (Optional a)
-findM p Nil = pure (Empty)
+findM _ Nil = pure Empty
 findM p (x :. xs) = p x >>= (\b -> if b then pure (Full x) else findM p xs)
 
 
@@ -165,23 +165,10 @@ firstRepeat ::
   Ord a =>
   List a
   -> Optional a   -- State (set, boolean) -> adding each el to set, and invoke contains or so. Must be linear time.
-firstRepeat Nil = Empty
-firstRepeat (x :. xs) = if (eval step x) then (Full x) else firstRepeat xs --need to flatmap set further
+firstRepeat list = snd $ foldRight (\el acc -> if (el `elem` fst acc) && snd acc == Empty
+                                         then (Nil, Full(el))
+                                         else ((el:.(fst acc)), snd acc) ) (Nil, Empty) list
 
-step ::
-  Ord a =>
-  a
-  -> State (Set a) Bool
-step a =
-  get >>= (\set -> (set ++ a , member a set))
-
-
-firstRepeat' ::
-  Ord a =>
-  List a
-  -> Optional a   -- first slow N*N time
-firstRepeat' Nil = Empty
-firstRepeat' (x :. xs) = find (==x) xs >>= (\value -> Empty firstRepeat xs else Full(x))
 
 -- | Remove all duplicate elements in a `List`.
 -- /Tip:/ Use `filtering` and `State` with a @Data.Set#Set@.
@@ -193,8 +180,27 @@ distinct ::
   Ord a =>
   List a
   -> List a
-distinct =
-  error "todo: Course.State#distinct"
+distinct list =
+  exec (sequence $ step <$> list) Nil
+
+step ::
+  Ord a =>
+  a
+  -> State (List a) ()
+step el = get >>= (\li -> if elem el li then put li else put (el:.li))
+
+{-
+listWithState ::
+  Ord a1 =>
+  ((a1 -> State (S.Set a1) a2)
+  -> t
+  -> State (S.Set a3) a)
+  -> (a1 -> S.Set a1 -> a2)
+  -> t
+  -> a
+listWithState f m x =
+  eval (f (State . lift2 (lift2 (,)) m S.insert) x) S.empty
+-}
 
 -- | A happy number is a positive integer, where the sum of the square of its digits eventually reaches 1 after repetition.
 -- In contrast, a sad number (not a happy number) is where the sum of the square of its digits never reaches 1
@@ -220,5 +226,21 @@ distinct =
 isHappy ::
   Integer
   -> Bool
-isHappy =
-  error "todo: Course.State#isHappy"
+isHappy number
+  | n > 9 = isHappy n
+  | n == 1 = True
+  | otherwise = False
+  where n = (squareSum . split) number
+
+split ::
+ Integer
+ -> List Integer
+split n =
+  if (n == 0)
+   then Nil
+   else (n `mod` 10) :. split (n `div` 10)
+
+squareSum ::
+ List Integer
+ -> Integer
+squareSum list =  foldRight (+) (0) ((\x -> x * x) <$> list)
