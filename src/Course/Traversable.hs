@@ -9,7 +9,7 @@ import Course.Apply
 import Course.Applicative
 import Course.List
 
--- | All instances of the `Traversable` type-class must satisfy two laws. These
+-- | All instances of the `Traversable` type-class must satisfy three laws. These
 -- laws are not checked by the compiler. These laws are given as:
 --
 -- * The law of naturality

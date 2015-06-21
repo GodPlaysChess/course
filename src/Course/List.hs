@@ -694,6 +694,20 @@ show' ::
   -> List Char
 show' =
   listh . show
+  
+tail ::
+  List a
+  -> List a
+tail Nil = Nil
+tail (_ :. xs) = xs
+
+tails ::
+  List a
+  -> List (List a)
+tails Nil = Nil
+tails list = (tail list) :. (tails (tail list))
+
+
 
 instance P.Functor List where
   fmap =

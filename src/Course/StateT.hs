@@ -194,7 +194,7 @@ distinct' ::
 distinct' =
   error "todo: Course.StateT#distinct'"
   -- State: List -> ( List <- this grows , List <- this smaller )
-  
+  {-
 listWithState ::
   (Ord a, Num a) =>
   a
@@ -206,7 +206,7 @@ listWithState a f =
     p <- f a ls
     if p then put (a :. ls) else put ls
     return (p)   
-
+    -}
 -- | Remove all duplicate elements in a `List`.
 -- However, if you see a value greater than `100` in the list,
 -- abort the computation by producing `Empty`.
