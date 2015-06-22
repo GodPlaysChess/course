@@ -179,7 +179,7 @@ putT ::
   -> StateT s f ()
 putT s =
   StateT $ \_ -> pure((), s)
-    
+--same as  StateT . const . pure . (,) ()
   
 
 -- | Remove all duplicate elements in a `List`.

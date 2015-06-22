@@ -298,8 +298,21 @@ findRight ::
   (a -> Bool)
   -> ListZipper a
   -> MaybeListZipper a
-findRight =
-  error "todo: Course.ListZipper#findRight"
+findRight p (ListZipper l x r)
+  | isEmpty right = IsNotZ
+  | otherwise = IsZ $ ListZipper (l ++ x :. left) h tail
+  where (left, right@(h :. tail)) = break p r
+
+reverseZipper ::
+  ListZipper a
+  -> ListZipper a
+reverseZipper (ListZipper l x r) = ListZipper (reverse r) x (reverse l)
+
+reverseMbZipper ::
+  MaybeListZipper a
+  -> MaybeListZipper a
+reverseMbZipper (IsZ l) = IsZ (reverseZipper l)
+reverseMbZipper _ = IsNotZ
 
 -- | Move the zipper left, or if there are no elements to the left, go to the far right.
 --

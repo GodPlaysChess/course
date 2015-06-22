@@ -51,8 +51,11 @@ instance Extend List where
     (List a -> b)
     -> List a
     -> List b
-  f <<= list =
-    f <$> (list :. tails list)
+  _ <<= Nil =
+   Nil
+  f <<= l@(_ :. xs) =
+    f l :. (<<=) f xs
+
     
 
 -- | Implement the @Extend@ instance for @Optional@.
