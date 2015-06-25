@@ -707,6 +707,13 @@ tails ::
 tails Nil = Nil
 tails list = (tail list) :. (tails (tail list))
 
+splitAtLast ::
+  List a
+  -> (List a, a)
+splitAtLast (x :. Nil) = (Nil, x)
+splitAtLast (x :. xs) = let result = splitAtLast xs
+                        in (x :. fst result, snd result)
+
 
 
 instance P.Functor List where

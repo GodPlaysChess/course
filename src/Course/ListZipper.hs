@@ -172,7 +172,7 @@ toList ::
   ListZipper a
   -> List a
 toList (ListZipper l x r) =
-  l ++ (x :. r)
+  (reverse l) ++ (x :. r)
 
 -- | Convert the given (maybe) zipper back to a list.
 toListZ ::
@@ -270,11 +270,10 @@ findLeft ::
   (a -> Bool)
   -> ListZipper a
   -> MaybeListZipper a
-findLeft p lz =  
-  let (left, right) = (break p ((reverse . lefts) lz))
-  in case right of 
-          Nil -> IsNotZ
-          (x:.xs) -> IsZ $ ListZipper xs x (reverse left ++ (focus lz :. rights lz))
+findLeft p (ListZipper l x r)
+  | isEmpty right = IsNotZ
+  | otherwise = IsZ $ ListZipper tail h (left ++ x :. r)
+  where (left, right@(h :. tail)) = break p l
     
 -- | Seek to the right for a location matching a predicate, starting from the
 -- current one.
@@ -300,7 +299,7 @@ findRight ::
   -> MaybeListZipper a
 findRight p (ListZipper l x r)
   | isEmpty right = IsNotZ
-  | otherwise = IsZ $ ListZipper (l ++ x :. left) h tail
+  | otherwise = IsZ $ ListZipper (reverse left ++ x :. l) h tail
   where (left, right@(h :. tail)) = break p r
 
 reverseZipper ::
@@ -324,8 +323,12 @@ reverseMbZipper _ = IsNotZ
 moveLeftLoop ::
   ListZipper a
   -> ListZipper a
-moveLeftLoop =
-  error "todo: Course.ListZipper#moveLeftLoop"
+moveLeftLoop (ListZipper Nil x Nil) = ListZipper Nil x Nil
+moveLeftLoop (ListZipper Nil x r) = let (init, last) = splitAtLast r
+                                    in ListZipper (reverse (x :. init)) last Nil
+moveLeftLoop (ListZipper (l :. ls) x r) =
+  ListZipper ls l (x :. r)
+
 
 -- | Move the zipper right, or if there are no elements to the right, go to the far left.
 --
