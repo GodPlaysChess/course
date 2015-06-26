@@ -79,8 +79,8 @@ unexpectedCharParser c =
 valueParser ::
   a
   -> Parser a
-valueParser =
-  error "todo: Course.Parser#valueParser"
+valueParser a =
+  P $ \str -> Result str a
 
 -- | Return a parser that always fails with the given error.
 --
@@ -89,7 +89,7 @@ valueParser =
 failed ::
   Parser a
 failed =
-  error "todo: Course.Parser#failed"
+  P $ \s -> ErrorResult Failed
 
 -- | Return a parser that succeeds with a character off the input or fails with an error if the input is empty.
 --
@@ -101,7 +101,9 @@ failed =
 character ::
   Parser Char
 character =
-  error "todo: Course.Parser#character"
+  P $ \input -> case input of
+                (c :. cs) -> Result cs c
+                _ -> ErrorResult Failed
 
 -- | Return a parser that maps any succeeding result with the given function.
 --
@@ -114,9 +116,10 @@ mapParser ::
   (a -> b)
   -> Parser a
   -> Parser b
-mapParser =
-  error "todo: Course.Parser#mapParser"
-
+mapParser f (P pa) =
+  P $ \input -> case (pa input) of
+                Result r a -> Result r (f a)
+                ErrorResult x -> ErrorResult x
 -- | This is @mapParser@ with the arguments flipped.
 -- It might be more helpful to use this function if you prefer this argument order.
 flmapParser ::
