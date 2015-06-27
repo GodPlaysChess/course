@@ -233,7 +233,7 @@ hasLeft ::
   ListZipper a
   -> Bool
 hasLeft =
-  isEmpty . lefts
+  not . isEmpty . lefts
 
 -- | Returns whether there are values to the right of focus.
 --
@@ -246,7 +246,7 @@ hasRight ::
   ListZipper a
   -> Bool
 hasRight =
-  isEmpty . rights
+  not . isEmpty . rights
 
 -- | Seek to the left for a location matching a predicate, starting from the
 -- current one.
