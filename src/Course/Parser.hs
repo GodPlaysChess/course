@@ -103,7 +103,7 @@ character ::
 character =
   P $ \input -> case input of
                 (c :. cs) -> Result cs c
-                _ -> ErrorResult UnexpectedEof
+                _         -> ErrorResult UnexpectedEof
 
 -- | Return a parser that maps any succeeding result with the given function.
 --
@@ -118,7 +118,7 @@ mapParser ::
   -> Parser b
 mapParser f (P pa) =
   P $ \input -> case (pa input) of
-                Result r a -> Result r (f a)
+                Result r a    -> Result r (f a)
                 ErrorResult x -> ErrorResult x
 -- | This is @mapParser@ with the arguments flipped.
 -- It might be more helpful to use this function if you prefer this argument order.
@@ -213,7 +213,7 @@ flbindParser =
 (|||) (P p1) (P p2) =
   P $ (\str -> case p1 str of
                ErrorResult _ -> p2 str
-               Result a x -> Result a x)
+               Result a x    -> Result a x)
 
 
 infixl 3 |||
@@ -333,7 +333,7 @@ natural ::
   Parser Int
 natural =
   bindParser (\chars -> case read chars of
-                        Empty -> failed
+                        Empty  -> failed
                         Full n -> valueParser n) (list1 digit)
 
 --
