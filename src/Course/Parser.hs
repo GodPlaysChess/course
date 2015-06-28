@@ -535,8 +535,7 @@ smokerParser =
 phoneBodyParser ::
   Parser Chars
 phoneBodyParser =
-   let unit = mapParser (:. Nil) (is '-' ||| is '.') ||| (list1 digit)
-   in mapParser flatten (list1 unit)
+   list (digit ||| is '.' ||| is '-')
 
 -- | Write a parser for Person.phone.
 --
