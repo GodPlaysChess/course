@@ -83,13 +83,14 @@ instance Apply Optional where
 -- 39
 --
 -- >>> ((*) <*> (+2)) 3
--- 15   t -> a -> b =>  t -> a => t -> b
+-- 15
 instance Apply ((->) t) where
   (<*>) ::
     ((->) t (a -> b))
     -> ((->) t a)
     -> ((->) t b)
-  (<*>) f g = \x -> f x (g x)
+  (<*>) f g =
+    \x -> f x (g x)
 
 
 -- | Apply a binary function in the environment.

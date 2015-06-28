@@ -70,8 +70,8 @@ instance Extend Optional where
     (Optional a -> b)
     -> Optional a
     -> Optional b
-  (<<=) f =
-    Full . f
+  f <<= o =
+    f . Full <$> o
     
 
 -- | Duplicate the functor using extension.
