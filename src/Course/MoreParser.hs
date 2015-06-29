@@ -273,7 +273,7 @@ hex =
 hexu ::
   Parser Char
 hexu =
-  error "todo: Course.MoreParser#hexu"
+  (is 'u') >>> hex
 
 -- | Write a function that produces a non-empty list of values coming off the given parser (which must succeed at least once),
 -- separated by the second given parser.
@@ -295,8 +295,13 @@ sepby1 ::
   Parser a
   -> Parser s
   -> Parser (List a)
-sepby1 =
-  error "todo: Course.MoreParser#sepby1"
+sepby1 pa ps =
+  pa >>= \a ->
+    (a :. ) <$> list (ps >>> pa)
+
+--     do v <- p
+--          w <- list (s *> p)
+--          pure (v:.w)
 
 -- | Write a function that produces a list of values coming off the given parser,
 -- separated by the second given parser.
@@ -318,8 +323,8 @@ sepby ::
   Parser a
   -> Parser s
   -> Parser (List a)
-sepby =
-  error "todo: Course.MoreParser#sepby"
+sepby pa ps =
+  sepby1 pa ps ||| pure Nil
 
 -- | Write a parser that asserts that there is no remaining input.
 --
@@ -331,7 +336,11 @@ sepby =
 eof ::
   Parser ()
 eof =
-  error "todo: Course.MoreParser#eof"
+  P $ \str -> case str of
+              Nil -> Result Nil ()
+              _ -> Failed
+
+
 
 -- | Write a parser that produces a character that satisfies all of the given predicates.
 --
