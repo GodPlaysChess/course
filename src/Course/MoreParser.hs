@@ -338,8 +338,7 @@ eof ::
 eof =
   P $ \str -> case str of
               Nil -> Result Nil ()
-              _ -> Failed
-
+              _ -> ErrorResult Failed
 
 
 -- | Write a parser that produces a character that satisfies all of the given predicates.
@@ -363,8 +362,9 @@ eof =
 satisfyAll ::
   List (Char -> Bool)
   -> Parser Char
-satisfyAll =
-  error "todo: Course.MoreParser#satisfyAll"
+satisfyAll cond =
+  satisfy $ foldRight (\p f -> \c -> p c && f c) (const True) cond
+
 
 -- | Write a parser that produces a character that satisfies any of the given predicates.
 --
@@ -384,8 +384,9 @@ satisfyAll =
 satisfyAny ::
   List (Char -> Bool)
   -> Parser Char
-satisfyAny =
-  error "todo: Course.MoreParser#satisfyAny"
+satisfyAny cond =
+  satisfy $ foldRight (\p f -> \c -> p c || f c) (const False) cond
+  -- satisfy (and  . sequence ps)
 
 -- | Write a parser that parses between the two given characters, separated by a comma character ','.
 --
@@ -413,5 +414,5 @@ betweenSepbyComma ::
   -> Char
   -> Parser a
   -> Parser (List a)
-betweenSepbyComma =
-  error "todo: Course.MoreParser#betweenSepbyComma"
+betweenSepbyComma o c pa =
+   betweenCharTok o c pa `sepby` charTok ','
