@@ -111,7 +111,7 @@ toSpecialCharacter c =
 jsonString ::
   Parser Chars
 jsonString =
-  error "todo: Course.JsonParser#jsonString"
+  between quote quote (tok (list (character ||| hex )))
 
 -- | Parse a JSON rational.
 --

@@ -250,7 +250,10 @@ betweenCharTok c1 c2 =
 hex ::
   Parser Char
 hex =
-  error "todo: Course.MoreParser#hex"
+  let hInt s = case readHex s of
+                 Empty -> 0
+                 Full n -> n
+  in chr . hInt <$> sequence (replicate 4 (satisfy isHexDigit))
 
 -- | Write a function that parses the character 'u' followed by 4 hex digits and return the character value.
 --
