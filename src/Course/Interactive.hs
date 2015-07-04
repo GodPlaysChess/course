@@ -84,7 +84,16 @@ data Op =
 convertInteractive ::
   IO ()
 convertInteractive =
-  error "todo: Course.Interactive#convertInteractive"
+  vooid (untilM (\input -> if input == "q"
+                      then
+                        putStrLn "bye" >-
+                        pure True
+                      else
+                        pure False)
+         (putStrLn "enter a letter to capitalize" >-
+          getLine >>= \str ->
+          putStrLn (toUpper <$> str) >-
+          pure str))
 
 -- |
 --
@@ -112,7 +121,12 @@ convertInteractive =
 reverseInteractive ::
   IO ()
 reverseInteractive =
-  error "todo: Course.Interactive#reverseInteractive"
+  putStrLn "enter a filename to reverse " >-
+  getLine >>= \fname ->
+  putStrLn "where to write a file" >-
+  getLine >>= \path ->
+  readFile fname >>= \content ->
+  writeFile path (reverse content)
 
 -- |
 --
@@ -138,7 +152,16 @@ reverseInteractive =
 encodeInteractive ::
   IO ()
 encodeInteractive =
-  error "todo: Course.Interactive#encodeInteractive"
+  putStrLn "enter a string to url-encode" >-
+    getLine >>= \str ->
+    putStrLn (encoded str)
+    where encoded Nil = Nil
+          encoded (' ' :. xs) = "%20" ++ encoded xs
+          encoded (x:.y:.xs)
+           |x == '\\' && y == 't' = "%09" ++ encoded xs
+           |x == '\\' && y == '\"' = "%22" ++ encoded xs
+           |otherwise = x :. encoded (y :. xs)
+
 
 interactive ::
   IO ()
