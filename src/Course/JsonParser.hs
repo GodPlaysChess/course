@@ -111,7 +111,27 @@ toSpecialCharacter c =
 jsonString ::
   Parser Chars
 jsonString =
-  between quote quote (tok (list (character ||| hex )))
+  let strp =
+        do c1 <- character
+           if c1 == '\\'
+              then
+               do c2 <- character
+                  if c2 == 'u'
+                    then
+                      hex
+                    else
+                      case toSpecialCharacter c2 of
+                        Empty ->
+                          unexpectedCharParser c2
+                        Full d ->
+                          return (fromSpecialCharacter d)
+              else
+                if c1 == '"'
+                  then
+                    unexpectedCharParser '"'
+                  else
+                   return c1
+   in between (is '"') (charTok '"') (list strp)
 
 -- | Parse a JSON rational.
 --
@@ -140,7 +160,22 @@ jsonString =
 jsonNumber ::
   Parser Rational
 jsonNumber =
-  error "todo: Course.JsonParser#jsonNumber"
+  (readFloats <$> list (digit ||| is '-' ||| is '.')) >>= (\oa -> case oa of
+                                                                  Empty -> failed
+                                                                  Full (a, _) -> pure a)
+
+
+jsonNumber' ::
+  Parser Rational
+jsonNumber' =
+  do aa <- list (digit ||| is '-' ||| is '.')
+     let oa = readFloats aa
+     case oa of
+        Empty -> failed
+        Full (a, _) -> return a
+
+
+
 
 -- | Parse a JSON true literal.
 --
@@ -154,7 +189,7 @@ jsonNumber =
 jsonTrue ::
   Parser Chars
 jsonTrue =
-  error "todo: Course.JsonParser#jsonTrue"
+  stringTok "true"
 
 -- | Parse a JSON false literal.
 --
@@ -168,7 +203,7 @@ jsonTrue =
 jsonFalse ::
   Parser Chars
 jsonFalse =
-  error "todo: Course.JsonParser#jsonFalse"
+  stringTok "false"
 
 -- | Parse a JSON null literal.
 --
@@ -182,7 +217,7 @@ jsonFalse =
 jsonNull ::
   Parser Chars
 jsonNull =
-  error "todo: Course.JsonParser#jsonNull"
+  stringTok "null"
 
 -- | Parse a JSON array.
 --
@@ -205,7 +240,7 @@ jsonNull =
 jsonArray ::
   Parser (List JsonValue)
 jsonArray =
-  error "todo: Course.JsonParser#jsonArray"
+  betweenSepbyComma '[' ']' jsonValue
 
 -- | Parse a JSON object.
 --
@@ -225,8 +260,12 @@ jsonArray =
 jsonObject ::
   Parser Assoc
 jsonObject =
-  error "todo: Course.JsonParser#jsonObject"
-
+  betweenSepbyComma '{' '}'
+    (do k <- jsonString
+        charTok ':'
+        v <- jsonValue
+        pure (k, v)
+     )
 -- | Parse a JSON value.
 --
 -- /Tip:/ Use `spaces`, `jsonNull`, `jsonTrue`, `jsonFalse`, `jsonArray`, `jsonString`, `jsonObject` and `jsonNumber`.
@@ -242,7 +281,14 @@ jsonObject =
 jsonValue ::
   Parser JsonValue
 jsonValue =
-   error "todo: Course.JsonParser#jsonValue"
+   (pure JsonNull) <* jsonNull |||
+   (pure JsonTrue) <* jsonTrue |||
+   (pure JsonFalse) <* jsonFalse |||
+   JsonArray <$> jsonArray |||
+   JsonString <$> jsonString |||
+   JsonObject <$> jsonObject |||
+   JsonRational False <$> jsonNumber
+--        ||| jsonNumber
 
 -- | Read a file into a JSON value.
 --
@@ -250,5 +296,10 @@ jsonValue =
 readJsonValue ::
   Filename
   -> IO (ParseResult JsonValue)
-readJsonValue =
-  error "todo: Course.JsonParser#readJsonValue"
+readJsonValue f =
+  (parse jsonValue) <$> (readFile f)
+
+
+--   do file <- readFile f
+--      let res = parse jsonValue file
+--      return res
